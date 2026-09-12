@@ -36,13 +36,6 @@ confirm() {
   [[ $answer =~ ^[Yy]([Ee][Ss])?$ ]]
 }
 
-systemd_quote() {
-  local value=$1
-  value=${value//\\/\\\\}
-  value=${value//\"/\\\"}
-  printf '"%s"' "$value"
-}
-
 require_tty() {
   [[ -r /dev/tty && -w /dev/tty ]] || die 'Wizard ieu interaktif sareng peryogi terminal. Mangga jalankeun tina sési SSH/terminal.'
 }
@@ -139,6 +132,9 @@ info 'Nuju ngadamel service sareng Caddyfile'
 mkdir -p "$SERVICE_DIR"
 umask 077
 
+[[ $WORKING_DIRECTORY != *' '* ]] || die 'Path project teu kénging ngandung spasi.'
+[[ $OPENCODE_BIN != *' '* ]] || die 'Path executable opencode teu kénging ngandung spasi.'
+
 cat >"$SERVICE_FILE" <<EOF
 [Unit]
 Description=OpenCode Web Server ($PROJECT_MODE project)
@@ -147,11 +143,11 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=$(systemd_quote "$WORKING_DIRECTORY")
-Environment=HOME=%h
-Environment=XDG_CONFIG_HOME=%h/.config
-Environment=XDG_DATA_HOME=%h/.local/share
-ExecStart=$(systemd_quote "$OPENCODE_BIN") serve --hostname 127.0.0.1 --port $PORT
+WorkingDirectory=$WORKING_DIRECTORY
+Environment=HOME=$HOME
+Environment=XDG_CONFIG_HOME=$HOME/.config
+Environment=XDG_DATA_HOME=$HOME/.local/share
+ExecStart=$OPENCODE_BIN serve --hostname 127.0.0.1 --port $PORT
 Restart=on-failure
 RestartSec=5
 
@@ -173,6 +169,10 @@ $DOMAIN {
 }
 EOF
 chmod 600 "$CADDY_FILE"
+
+if ! systemd-analyze --user verify "$SERVICE_FILE"; then
+  die "Unit file teu valid: $SERVICE_FILE. Mangga tingalikeun pesen di luhur."
+fi
 
 systemctl --user daemon-reload
 systemctl --user enable --now "$SERVICE_NAME.service"
