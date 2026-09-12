@@ -159,13 +159,18 @@ cat >"$CADDY_FILE" <<EOF
 # Tambihkeun site block ieu ka /etc/caddy/Caddyfile atanapi /etc/caddy/sites/$DOMAIN.
 # Ulah muka port $PORT ka internet; OpenCode ngan ngadangukeun di 127.0.0.1.
 $DOMAIN {
-	encode gzip zstd
 
 	basic_auth {
 		$AUTH_USERNAME $CADDY_HASH
 	}
 
 	reverse_proxy 127.0.0.1:$PORT
+  @websocket {
+    header Connection *Upgrade*
+    header Upgrade websocket
+  }
+  reverse_proxy @websocket 127.0.0.1:$PORT
+
 }
 EOF
 chmod 600 "$CADDY_FILE"
