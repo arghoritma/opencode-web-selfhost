@@ -7,7 +7,7 @@ SERVICE_DIR="$HOME/.config/systemd/user"
 SERVICE_FILE="$SERVICE_DIR/$SERVICE_NAME.service"
 
 die() {
-  printf 'Error: %s\n' "$*" >&2
+  printf 'Lepat: %s\n' "$*" >&2
   exit 1
 }
 
@@ -44,25 +44,25 @@ systemd_quote() {
 }
 
 require_tty() {
-  [[ -r /dev/tty && -w /dev/tty ]] || die 'Wizard ini interaktif dan membutuhkan terminal. Jalankan dari sesi SSH/terminal.'
+  [[ -r /dev/tty && -w /dev/tty ]] || die 'Wizard ieu interaktif sareng peryogi terminal. Mangga jalankeun tina sési SSH/terminal.'
 }
 
 require_command() {
   command -v "$1" >/dev/null 2>&1 || die "'$1' tidak ditemukan. $2"
 }
 
-[[ ${BASH_VERSINFO[0]} -ge 4 ]] || die 'Bash 4 atau lebih baru diperlukan.'
-[[ $(uname -s) == Linux ]] || die 'Wizard ini hanya mendukung server Linux.'
+[[ ${BASH_VERSINFO[0]} -ge 4 ]] || die 'Bash 4 atanapi nu langkung énggal diperyogikeun.'
+[[ $(uname -s) == Linux ]] || die 'Wizard ieu ngan ngarojong server Linux.'
 require_tty
-require_command systemctl 'Pastikan server memakai systemd.'
-require_command opencode 'Instal terlebih dahulu: curl -fsSL https://opencode.ai/install | bash'
-require_command caddy 'Instal Caddy terlebih dahulu agar password dapat di-hash.'
+require_command systemctl 'Mangga pastikeun server nganggo systemd.'
+require_command opencode 'Mangga pasang heula: curl -fsSL https://opencode.ai/install | bash'
+require_command caddy 'Mangga pasang Caddy heula sangkan password tiasa di-hash.'
 
 OPENCODE_BIN=$(command -v opencode)
 
-info 'OpenCode Web setup'
-printf '%s\n' 'Service akan berjalan sebagai user saat ini dan hanya mendengar di 127.0.0.1.'
-printf '%s\n' 'Caddyfile akan dibuat sebagai file terpisah; konfigurasi Caddy aktif tidak akan diubah.'
+info 'Pangaturan OpenCode Web'
+printf '%s\n' 'Service badé dijalankeun ku user ayeuna sareng ngan ngadangukeun di 127.0.0.1.'
+printf '%s\n' 'Caddyfile badé didamel jadi file misah; konfigurasi Caddy nu aktip moal dirobih.'
 
 while true; do
   mode=$(read_input 'Mode project: [1] multi-project, [2] single-project: ')
@@ -75,17 +75,17 @@ while true; do
     2)
       PROJECT_MODE=single
       while true; do
-        PROJECT_PATH=$(read_input 'Full path project (contoh /home/admin/project/myproject): ')
-        [[ -n $PROJECT_PATH ]] || { printf '%s\n' 'Path tidak boleh kosong.' >/dev/tty; continue; }
-        [[ $PROJECT_PATH = /* ]] || { printf '%s\n' 'Gunakan path absolut.' >/dev/tty; continue; }
-        [[ -d $PROJECT_PATH ]] || { printf '%s\n' 'Direktori project tidak ditemukan.' >/dev/tty; continue; }
-        [[ $PROJECT_PATH != *$'\n'* ]] || { printf '%s\n' 'Path tidak boleh berisi baris baru.' >/dev/tty; continue; }
+        PROJECT_PATH=$(read_input 'Path lengkep project (contoh /home/admin/project/myproject): ')
+        [[ -n $PROJECT_PATH ]] || { printf '%s\n' 'Path teu kénging kosong.' >/dev/tty; continue; }
+        [[ $PROJECT_PATH = /* ]] || { printf '%s\n' 'Mangga anggo path absolut.' >/dev/tty; continue; }
+        [[ -d $PROJECT_PATH ]] || { printf '%s\n' 'Diréktori project teu kapendak.' >/dev/tty; continue; }
+        [[ $PROJECT_PATH != *$'\n'* ]] || { printf '%s\n' 'Path teu kénging ngandung baris anyar.' >/dev/tty; continue; }
         WORKING_DIRECTORY=$PROJECT_PATH
         break
       done
       break
       ;;
-    *) printf '%s\n' 'Pilih 1 atau 2.' >/dev/tty ;;
+    *) printf '%s\n' 'Mangga pilih 1 atanapi 2.' >/dev/tty ;;
   esac
 done
 
@@ -94,7 +94,7 @@ while true; do
   if [[ $PORT =~ ^[0-9]+$ ]] && (( PORT >= 1024 && PORT <= 65535 )); then
     break
   fi
-  printf '%s\n' 'Port harus berupa angka antara 1024 dan 65535.' >/dev/tty
+  printf '%s\n' 'Port kedah mangrupa angka antara 1024 dugi ka 65535.' >/dev/tty
 done
 
 while true; do
@@ -102,7 +102,7 @@ while true; do
   if [[ $DOMAIN =~ ^[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$ ]]; then
     break
   fi
-  printf '%s\n' 'Masukkan domain valid tanpa http:// atau path.' >/dev/tty
+  printf '%s\n' 'Mangga lebetkeun domain nu valid tanpa http:// atanapi path.' >/dev/tty
 done
 
 while true; do
@@ -110,15 +110,15 @@ while true; do
   if [[ $AUTH_USERNAME =~ ^[A-Za-z0-9._-]+$ ]]; then
     break
   fi
-  printf '%s\n' 'Username hanya boleh huruf, angka, titik, garis bawah, atau strip.' >/dev/tty
+  printf '%s\n' 'Username ngan kénging hurup, angka, titik, garis handap, atanapi strip.' >/dev/tty
 done
 
 while true; do
   AUTH_PASSWORD=$(read_secret 'Password Basic Auth: ')
-  [[ -n $AUTH_PASSWORD ]] || { printf '%s\n' 'Password tidak boleh kosong.' >/dev/tty; continue; }
-  AUTH_PASSWORD_CONFIRM=$(read_secret 'Ulangi password: ')
+  [[ -n $AUTH_PASSWORD ]] || { printf '%s\n' 'Password teu kénging kosong.' >/dev/tty; continue; }
+  AUTH_PASSWORD_CONFIRM=$(read_secret 'Lebetkeun deui password: ')
   [[ $AUTH_PASSWORD == "$AUTH_PASSWORD_CONFIRM" ]] && break
-  printf '%s\n' 'Password tidak sama, coba lagi.' >/dev/tty
+  printf '%s\n' 'Password henteu sarua, mangga cobian deui.' >/dev/tty
 done
 unset AUTH_PASSWORD_CONFIRM
 
@@ -126,14 +126,14 @@ CADDY_HASH=$(printf '%s' "$AUTH_PASSWORD" | caddy hash-password)
 unset AUTH_PASSWORD
 CADDY_FILE="$HOME/${DOMAIN}.opencode.Caddyfile"
 
-if [[ -e $SERVICE_FILE ]] && ! confirm "Service $SERVICE_FILE sudah ada dan akan ditimpa. Lanjutkan?"; then
-  die 'Dibatalkan. Tidak ada perubahan dibuat.'
+if [[ -e $SERVICE_FILE ]] && ! confirm "Service $SERVICE_FILE parantos aya sareng badé ditimpa. Teraskeun?"; then
+  die 'Dibatalkeun. Teu aya parobihan nu didamel.'
 fi
-if [[ -e $CADDY_FILE ]] && ! confirm "Caddyfile $CADDY_FILE sudah ada dan akan ditimpa. Lanjutkan?"; then
-  die 'Dibatalkan. Tidak ada perubahan dibuat.'
+if [[ -e $CADDY_FILE ]] && ! confirm "Caddyfile $CADDY_FILE parantos aya sareng badé ditimpa. Teraskeun?"; then
+  die 'Dibatalkeun. Teu aya parobihan nu didamel.'
 fi
 
-info 'Membuat service dan Caddyfile'
+info 'Nuju ngadamel service sareng Caddyfile'
 mkdir -p "$SERVICE_DIR"
 umask 077
 
@@ -158,8 +158,8 @@ WantedBy=default.target
 EOF
 
 cat >"$CADDY_FILE" <<EOF
-# Tambahkan site block ini ke /etc/caddy/Caddyfile atau /etc/caddy/sites/$DOMAIN.
-# Jangan expose port $PORT ke internet; OpenCode hanya mendengar di 127.0.0.1.
+# Tambihkeun site block ieu ka /etc/caddy/Caddyfile atanapi /etc/caddy/sites/$DOMAIN.
+# Ulah muka port $PORT ka internet; OpenCode ngan ngadangukeun di 127.0.0.1.
 $DOMAIN {
 	encode gzip zstd
 
@@ -175,12 +175,12 @@ chmod 600 "$CADDY_FILE"
 systemctl --user daemon-reload
 systemctl --user enable --now "$SERVICE_NAME.service"
 
-info 'Setup selesai'
+info 'Pangaturan parantos réngsé'
 printf 'Mode: %s\nService: %s\nProject awal: %s\nPort loopback: %s\n' "$PROJECT_MODE" "$SERVICE_FILE" "$WORKING_DIRECTORY" "$PORT"
 printf 'Caddyfile: %s\n' "$CADDY_FILE"
-printf '\nLangkah berikutnya:\n'
-printf '1. Pastikan DNS %s mengarah ke IP publik server dan port 80/443 terbuka.\n' "$DOMAIN"
-printf '2. Salin isi %s ke Caddyfile utama atau file /etc/caddy/sites/%s.\n' "$CADDY_FILE" "$DOMAIN"
-printf '3. Validasi dan reload: sudo caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile && sudo systemctl reload caddy\n'
-printf '4. Agar service user tetap berjalan setelah logout: loginctl enable-linger %s\n' "$USER"
+printf '\nLéngkah salajengna:\n'
+printf '1. Pastikeun DNS %s nuju ka IP publik server sareng port 80/443 kabuka.\n' "$DOMAIN"
+printf '2. Salin eusi %s ka Caddyfile utama atanapi file /etc/caddy/sites/%s.\n' "$CADDY_FILE" "$DOMAIN"
+printf '3. Validasi sareng reload: sudo caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile && sudo systemctl reload caddy\n'
+printf '4. Sangkan service user tetep jalan sanggeus logout: loginctl enable-linger %s\n' "$USER"
 printf '\nStatus: systemctl --user status %s\nLog: journalctl --user -u %s -f\n' "$SERVICE_NAME" "$SERVICE_NAME"

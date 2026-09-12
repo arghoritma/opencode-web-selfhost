@@ -1,35 +1,36 @@
 # Wizard OpenCode Web Self-Host
 
-`wizard.sh` adalah wizard interaktif untuk menjalankan OpenCode Web di server
-Linux melalui `opencode serve`, kemudian menghasilkan site block Caddy dengan
-Basic Auth. OpenCode hanya mendengar di `127.0.0.1`; akses publik dilakukan
-melalui Caddy dengan HTTPS.
+`wizard.sh` mangrupikeun wizard interaktif kanggo ngajalankeun OpenCode Web di
+server Linux ngalangkungan `opencode serve`, teras ngadamel site block Caddy
+kalayan Basic Auth. OpenCode ngan ngadangukeun di `127.0.0.1`; aksés umum
+ngalangkungan Caddy kalayan HTTPS.
 
-Wizard membuat dan langsung mengaktifkan service `systemd --user`. Wizard tidak
-mengubah, memvalidasi, atau me-reload konfigurasi Caddy yang sudah aktif.
+Wizard ngadamel sareng langsung ngaktipkeun service `systemd --user`. Wizard
+teu ngarobih, ngavalidasi, atanapi ngamuat ulang konfigurasi Caddy nu parantos
+aktip.
 
-## Prasyarat
+## Sarat Samemeh Ngajalankeun
 
-Jalankan wizard sebagai user Linux non-root yang akan menjalankan OpenCode dan
-yang memiliki akses ke project yang akan dibuka.
+Mangga jalankeun wizard ku user Linux non-root anu badé ngajalankeun OpenCode
+sareng anu ngagaduhan idin aksés kana project nu badé dibuka.
 
-- Server Linux yang memakai `systemd` dan Bash 4 atau lebih baru.
-- Akses terminal interaktif, misalnya melalui SSH. Wizard tidak dapat dijalankan
-  pada session tanpa TTY.
-- OpenCode sudah terpasang dan tersedia pada `PATH`.
-- Caddy sudah terpasang. Wizard memakai `caddy hash-password` untuk membuat
-  hash password, tetapi tidak mengubah service atau konfigurasi Caddy.
-- Untuk akses melalui domain: DNS `A` atau `AAAA` domain sudah mengarah ke IP
-  publik server, serta port TCP `80` dan `443` terbuka.
+- Server Linux anu nganggo `systemd` sareng Bash 4 atanapi nu langkung énggal.
+- Aksés terminal interaktif, upamana ngalangkungan SSH. Wizard teu tiasa
+  dijalankeun dina sési tanpa TTY.
+- OpenCode parantos dipasang sareng sayogi dina `PATH`.
+- Caddy parantos dipasang. Wizard nganggo `caddy hash-password` kanggo ngadamel
+  hash password, tapi teu ngarobih service atanapi konfigurasi Caddy.
+- Pikeun aksés ngalangkungan domain: DNS `A` atanapi `AAAA` domain parantos
+  nuju ka IP publik server, sareng port TCP `80` sareng `443` parantos kabuka.
 
-Instal OpenCode bila belum tersedia:
+Pasang OpenCode upami tacan sayogi:
 
 ```bash
 curl -fsSL https://opencode.ai/install | bash
 opencode --version
 ```
 
-Instal Caddy pada Ubuntu/Debian bila belum tersedia:
+Pasang Caddy dina Ubuntu/Debian upami tacan sayogi:
 
 ```bash
 sudo apt update
@@ -37,202 +38,204 @@ sudo apt install -y caddy
 caddy version
 ```
 
-## Menjalankan Wizard
+## Ngajalankeun Wizard
 
-Jalankan langsung dari GitHub tanpa clone repository:
+Mangga jalankeun langsung tina GitHub tanpa kedah clone repository:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/arghoritma/opencode-web-selfhost/main/wizard.sh | bash
 ```
 
-Atau setelah repository di-clone:
+Atanapi saatos repository di-clone:
 
 ```bash
 bash wizard.sh
 ```
 
-Perintah `curl | bash` tetap interaktif karena wizard mengambil jawaban dari
-`/dev/tty`, bukan dari standard input pipe. Jalankan hanya setelah memeriksa
-isi script dari sumber yang dipercaya.
+Paréntah `curl | bash` tetep interaktif margi wizard nyandak jawaban tina
+`/dev/tty`, sanes tina standard input pipe. Mangga jalankeun ngan saatos
+mariksa eusi script tina sumber anu dipikantenang.
 
-## Pertanyaan Wizard
+## Patarosan Dina Wizard
 
-Wizard meminta nilai berikut:
+Wizard badé naroskeun nilai-nilai di handap:
 
-| Pertanyaan | Keterangan |
+| Patarosan | Katerangan |
 | --- | --- |
-| Mode project | `multi-project` atau `single-project`. |
-| Full path project | Hanya untuk mode single, harus merupakan direktori absolut yang sudah ada, misalnya `/home/admin/project/myproject`. |
-| Port OpenCode | Port antara `1024` sampai `65535`. Port ini hanya dibuka di loopback server. |
-| Domain | Domain Caddy, misalnya `opencode.example.com`, tanpa `https://` atau path. |
-| Username Basic Auth | Username untuk login browser. Hanya huruf, angka, `.`, `_`, dan `-`. |
-| Password Basic Auth | Password diminta dua kali, lalu diubah menjadi hash oleh Caddy. Password plaintext tidak disimpan dalam file hasil wizard. |
+| Mode project | `multi-project` atanapi `single-project`. |
+| Path lengkep project | Ngan pikeun mode single, kedah diréktori absolut anu parantos aya, contona `/home/admin/project/myproject`. |
+| Port OpenCode | Port antara `1024` dugi ka `65535`. Port ieu ngan kabuka dina loopback server. |
+| Domain | Domain Caddy, contona `opencode.example.com`, tanpa `https://` atanapi path. |
+| Username Basic Auth | Username kanggo login browser. Ngan hurup, angka, `.`, `_`, sareng `-`. |
+| Password Basic Auth | Password dipénta dua kali, teras dirobih janten hash ku Caddy. Password plaintext teu disimpen dina file hasil wizard. |
 
 ### Mode Single-Project
 
-OpenCode dijalankan dengan `WorkingDirectory` pada project yang dipilih. Contoh:
+OpenCode dijalankeun kalayan `WorkingDirectory` dina project anu dipilih.
+Contona:
 
 ```text
 /home/admin/project/myproject
 ```
 
-Mode ini cocok untuk satu repository atau satu direktori kerja utama.
+Mode ieu merenah kanggo hiji repository atanapi hiji diréktori gawé utama.
 
 ### Mode Multi-Project
 
-OpenCode dijalankan dengan home directory user sebagai `WorkingDirectory`.
-Pilih mode ini apabila user service harus membuka beberapa project yang berada
-di bawah permission user tersebut. Pastikan user hanya memiliki akses ke
-repository dan secret yang memang boleh dibuka dari OpenCode.
+OpenCode dijalankeun kalayan home directory user janten `WorkingDirectory`.
+Pilih mode ieu upami user service kedah muka sababaraha project anu aya dina
+idin aksés user éta. Mangga pastikeun user ngan ngagaduhan aksés kana
+repository sareng secret anu memang kenging dibuka tina OpenCode.
 
-## File Yang Dibuat
+## File Nu Didamel
 
-Setelah semua jawaban valid, wizard membuat:
+Saatos sadaya jawaban leres, wizard ngadamel:
 
-| File | Fungsi |
+| File | Kagunaan |
 | --- | --- |
-| `~/.config/systemd/user/opencode-web.service` | Service OpenCode yang menjalankan `opencode serve --hostname 127.0.0.1 --port <port>`. Service langsung di-enable dan dijalankan. |
-| `~/<domain>.opencode.Caddyfile` | Satu site block Caddy untuk domain dan port yang dipilih. File memiliki permission `600` karena memuat hash Basic Auth. |
+| `~/.config/systemd/user/opencode-web.service` | Service OpenCode anu ngajalankeun `opencode serve --hostname 127.0.0.1 --port <port>`. Service langsung di-enable sareng dijalankeun. |
+| `~/<domain>.opencode.Caddyfile` | Hiji site block Caddy kanggo domain sareng port anu dipilih. File miboga permission `600` margi ngamuat hash Basic Auth. |
 
-Jika file dengan nama yang sama sudah ada, wizard meminta konfirmasi sebelum
-menimpanya.
+Upami file kalayan nami anu sami parantos aya, wizard badé naroskeun
+konfirmasi samemeh nimpa file éta.
 
-Contoh lokasi output untuk domain `opencode.example.com`:
+Conto lokasi hasil kanggo domain `opencode.example.com`:
 
 ```text
 ~/.config/systemd/user/opencode-web.service
 ~/opencode.example.com.opencode.Caddyfile
 ```
 
-## Menerapkan Caddyfile
+## Nerapkeun Caddyfile
 
-Wizard sengaja hanya menghasilkan file Caddy agar Anda dapat memilih struktur
-konfigurasi Caddy yang dipakai server.
+Wizard ngahaja ngan nyiptakeun file Caddy sangkan anjeun tiasa milih struktur
+konfigurasi Caddy anu dianggo ku server.
 
-### Opsi 1: Caddyfile Utama
+### Pilihan 1: Caddyfile Utama
 
-Salin isi file hasil wizard ke `/etc/caddy/Caddyfile`, dengan tetap menjaga
-site block dan global options yang sudah ada:
+Salin eusi file hasil wizard ka `/etc/caddy/Caddyfile`, bari tetep ngajaga site
+block sareng global options anu parantos aya:
 
 ```bash
 sudo nano /etc/caddy/Caddyfile
 ```
 
-### Opsi 2: Folder Sites
+### Pilihan 2: Folder Sites
 
-Jika Caddyfile utama sudah mengimpor folder sites, salin file hasil wizard ke
-folder tersebut:
+Upami Caddyfile utama parantos ngimpor folder sites, salin file hasil wizard ka
+folder éta:
 
 ```bash
 sudo install -d -m 755 /etc/caddy/sites
 sudo install -o root -g caddy -m 640 "$HOME/opencode.example.com.opencode.Caddyfile" /etc/caddy/sites/opencode.example.com
 ```
 
-Pastikan `/etc/caddy/Caddyfile` memiliki import berikut jika belum ada:
+Pastikeun `/etc/caddy/Caddyfile` ngagaduhan import di handap upami tacan aya:
 
 ```caddyfile
 import /etc/caddy/sites/*
 ```
 
-Sebelum menerapkan perubahan, validasi kemudian reload Caddy:
+Samemeh nerapkeun parobihan, mangga validasi teras muat ulang Caddy:
 
 ```bash
 sudo caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
 sudo systemctl reload caddy
 ```
 
-Buka `https://opencode.example.com` dan masukkan username serta password yang
-Anda masukkan ke wizard.
+Bukakeun `https://opencode.example.com`, teras lebetkeun username sareng
+password anu diasupkeun kana wizard.
 
-## Service Management
+## Ngatur Service
 
-Periksa status service:
+Pariksa status service:
 
 ```bash
 systemctl --user status opencode-web
 ```
 
-Lihat log:
+Tingalkeun log:
 
 ```bash
 journalctl --user -u opencode-web -f
 ```
 
-Restart service setelah diperlukan:
+Ulang mimitian service upami diperyogikeun:
 
 ```bash
 systemctl --user restart opencode-web
 ```
 
-Hentikan atau jalankan kembali service:
+Eureunkeun atanapi jalankeun deui service:
 
 ```bash
 systemctl --user stop opencode-web
 systemctl --user start opencode-web
 ```
 
-Agar service user tetap berjalan setelah logout dan saat server boot, aktifkan
-linger sekali untuk user tersebut:
+Sangkan service user tetep jalan saatos logout sareng nalika server boot,
+aktipkeun linger sakali kanggo user éta:
 
 ```bash
 loginctl enable-linger "$(whoami)"
 ```
 
-## Keamanan
+## Kaamanan
 
-- Jangan menjalankan OpenCode sebagai root.
-- Jangan membuka port OpenCode yang dipilih ke internet. Service hanya perlu
-  mendengar di `127.0.0.1`; yang dibuka secara publik hanyalah TCP `80` dan
-  `443` untuk Caddy.
-- Basic Auth cocok untuk akses pribadi atau tim kecil. Gunakan autentikasi yang
-  lebih kuat seperti SSO atau identity-aware proxy untuk kebutuhan organisasi.
-- Review permission repository dan file rahasia seperti `.env`, terutama saat
-  memilih mode multi-project.
-- Password plaintext tidak disimpan wizard, tetapi hash Basic Auth pada
-  Caddyfile tetap merupakan data sensitif. Jangan commit file hasil wizard ke
-  Git atau membagikannya.
+- Ulah ngajalankeun OpenCode janten root.
+- Ulah muka port OpenCode anu dipilih ka internet. Service ngan peryogi
+  ngadangukeun di `127.0.0.1`; anu dibuka kanggo umum ngan TCP `80` sareng
+  `443` kanggo Caddy.
+- Basic Auth merenah kanggo aksés pribadi atanapi tim alit. Anggo auténtikasi
+  anu langkung kuat sapertos SSO atanapi identity-aware proxy kanggo kabutuhan
+  organisasi.
+- Mangga pariksa idin repository sareng file rusiah sapertos `.env`, utamina
+  nalika milih mode multi-project.
+- Password plaintext teu disimpen ku wizard, nanging hash Basic Auth dina
+  Caddyfile tetep data sénsitip. Ulah commit file hasil wizard kana Git atanapi
+  ngabagikeunana.
 
-## Troubleshooting
+## Milarian Pasualan
 
-### `opencode` atau `caddy` tidak ditemukan
+### `opencode` atanapi `caddy` teu kapendak
 
-Pastikan kedua command tersedia untuk user yang menjalankan wizard:
+Pastikeun kadua paréntah sayogi kanggo user anu ngajalankeun wizard:
 
 ```bash
 command -v opencode
 command -v caddy
 ```
 
-### Service gagal dimulai
+### Service teu tiasa dimimitian
 
-Periksa status dan log service:
+Pariksa status sareng log service:
 
 ```bash
 systemctl --user status opencode-web
 journalctl --user -u opencode-web -n 100 --no-pager
 ```
 
-Periksa juga apakah port yang dipilih sudah dipakai proses lain:
+Pariksa ogé naha port anu dipilih parantos dianggo ku prosés sanés:
 
 ```bash
 ss -tlnp | grep '<port>'
 ```
 
-Ganti `<port>` dengan port yang dimasukkan ke wizard.
+Gentos `<port>` ku port anu diasupkeun kana wizard.
 
-### Domain menampilkan `502 Bad Gateway`
+### Domain nembongkeun `502 Bad Gateway`
 
-Pastikan service OpenCode aktif dan Caddy meneruskan ke port yang sama:
+Pastikeun service OpenCode aktip sareng Caddy neraskeun ka port anu sami:
 
 ```bash
 systemctl --user status opencode-web
 sudo journalctl -u caddy -n 100 --no-pager
 ```
 
-### HTTPS belum diterbitkan
+### HTTPS tacan diterbitkeun
 
-Pastikan domain mengarah ke IP publik server, port `80` dan `443` dapat diakses
-dari internet, dan Caddyfile valid:
+Pastikeun domain nuju ka IP publik server, port `80` sareng `443` tiasa
+diaksés tina internet, sareng Caddyfile valid:
 
 ```bash
 sudo caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
