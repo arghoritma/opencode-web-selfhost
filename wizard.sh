@@ -122,7 +122,9 @@ while true; do
 done
 unset AUTH_PASSWORD_CONFIRM
 
-CADDY_HASH=$(printf '%s' "$AUTH_PASSWORD" | caddy hash-password)
+# Caddy hash-password reads from its terminal by default; --plaintext also works
+# when the wizard itself is executed through curl | bash.
+CADDY_HASH=$(caddy hash-password --plaintext "$AUTH_PASSWORD")
 unset AUTH_PASSWORD
 CADDY_FILE="$HOME/${DOMAIN}.opencode.Caddyfile"
 
